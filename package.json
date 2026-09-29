@@ -1,0 +1,31 @@
+{
+  "name": "appointment-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API simples de agendamentos baseada no projeto pj_pet_get",
+  "type": "commonjs",
+  "main": "server.js",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "db:sync": "node db/sync.js",
+    "db:start": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/local-db.ps1 start",
+    "db:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/local-db.ps1 stop",
+    "test:mysql": "node scripts/verify-mysql.js",
+    "test": "node --test"
+  },
+  "overrides": {
+    "sequelize": { "uuid": "11.1.1" }
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-validator": "^7.3.2",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.23.3",
+    "sequelize": "^6.37.8"
+  }
+}

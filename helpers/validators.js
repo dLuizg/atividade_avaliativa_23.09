@@ -30,7 +30,7 @@ module.exports = {
   reschedule: () => [date(body('date')), time()],
   list: () => [
     date(query('date').optional()),
-    query('status', 'A situação deve ser scheduled (agendado) ou cancelled (cancelado).').optional().isIn(['scheduled', 'cancelled']),
+    query('status', 'A situação deve ser agendado ou cancelado.').optional().customSanitizer((value) => ({ agendado: 'scheduled', cancelado: 'cancelled' }[value] || value)).isIn(['scheduled', 'cancelled']),
     query('limit', 'O limite deve ser um número inteiro entre 1 e 100.').optional().isInt({ min: 1, max: 100 }).toInt(),
     query('offset', 'O deslocamento deve ser um número inteiro entre 0 e 2147483647.').optional().isInt({ min: 0, max: 2147483647 }).toInt(),
   ],

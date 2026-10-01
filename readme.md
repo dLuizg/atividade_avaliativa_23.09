@@ -56,17 +56,17 @@ Todas as rotas de agendamentos exigem `Authorization: Bearer SEU_TOKEN`.
 
 | Método | Rota | Finalidade |
 | --- | --- | --- |
-| POST | `/users/register` | Cadastrar usuário com `name`, `email` e `password` |
-| POST | `/users/login` | Autenticar com `email` e `password` e receber o token |
-| POST | `/appointments` | Criar agendamento |
-| GET | `/appointments` | Consultar os próprios agendamentos |
-| GET | `/appointments/:id` | Consultar um agendamento pelo identificador |
-| PATCH | `/appointments/:id` | Editar `responsible` e/ou `description` |
-| PATCH | `/appointments/:id/reschedule` | Alterar `date` e `time` juntos |
-| PATCH | `/appointments/:id/cancel` | Cancelar sem excluir o registro |
+| POST | `/usuarios/cadastro` | Cadastrar usuário com `nome`, `email` e `senha` |
+| POST | `/usuarios/entrar` | Autenticar com `email` e `senha` e receber o token |
+| POST | `/agendamentos` | Criar agendamento |
+| GET | `/agendamentos` | Consultar os próprios agendamentos |
+| GET | `/agendamentos/:identificador` | Consultar um agendamento pelo identificador |
+| PATCH | `/agendamentos/:identificador` | Editar `responsavel` e/ou `descricao` |
+| PATCH | `/agendamentos/:identificador/reagendar` | Alterar `data` e `horario` juntos |
+| PATCH | `/agendamentos/:identificador/cancelar` | Cancelar sem excluir o registro |
 
-As mensagens e a documentação estão em português. Os identificadores técnicos de rotas,
-campos JSON, variáveis de ambiente e banco foram mantidos para preservar a compatibilidade.
+As rotas, parâmetros, campos JSON, valores de situação e mensagens da API estão em português.
+Os nomes técnicos internos do banco permanecem inalterados.
 
 ## Exemplo de uso
 
@@ -75,45 +75,45 @@ Com a API em execução, abra outro terminal PowerShell na pasta do projeto:
 ```powershell
 $api = 'http://localhost:3030'
 $email = "teste-$([guid]::NewGuid().ToString('N'))@example.com"
-$cadastro = @{ name = 'Ana Silva'; email = $email; password = 'SenhaDeTeste123!' } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri "$api/users/register" -ContentType 'application/json' -Body $cadastro
+$cadastro = @{ nome = 'Ana Silva'; email = $email; senha = 'SenhaDeTeste123!' } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri "$api/usuarios/cadastro" -ContentType 'application/json' -Body $cadastro
 
-$credenciais = @{ email = $email; password = 'SenhaDeTeste123!' } | ConvertTo-Json
-$login = Invoke-RestMethod -Method Post -Uri "$api/users/login" -ContentType 'application/json' -Body $credenciais
+$credenciais = @{ email = $email; senha = 'SenhaDeTeste123!' } | ConvertTo-Json
+$login = Invoke-RestMethod -Method Post -Uri "$api/usuarios/entrar" -ContentType 'application/json' -Body $credenciais
 $cabecalhos = @{ Authorization = "Bearer $($login.token)" }
 
-$dados = @{ date = '2030-10-15'; time = '09:30'; responsible = 'Ana Silva'; description = 'Consulta inicial' } | ConvertTo-Json
-$criado = Invoke-RestMethod -Method Post -Uri "$api/appointments" -Headers $cabecalhos -ContentType 'application/json' -Body $dados
-$id = $criado.appointment.id
+$dados = @{ data = '2030-10-15'; horario = '09:30'; responsavel = 'Ana Silva'; descricao = 'Consulta inicial' } | ConvertTo-Json
+$criado = Invoke-RestMethod -Method Post -Uri "$api/agendamentos" -Headers $cabecalhos -ContentType 'application/json' -Body $dados
+$id = $criado.agendamento.identificador
 
 # Consultar os agendamentos.
-Invoke-RestMethod -Uri "$api/appointments" -Headers $cabecalhos | ConvertTo-Json -Depth 5
+Invoke-RestMethod -Uri "$api/agendamentos" -Headers $cabecalhos | ConvertTo-Json -Depth 5
 
 # Editar o responsável e a descrição.
-$edicao = @{ responsible = 'Maria Silva'; description = 'Consulta atualizada' } | ConvertTo-Json
-Invoke-RestMethod -Method Patch -Uri "$api/appointments/$id" -Headers $cabecalhos -ContentType 'application/json' -Body $edicao
+$edicao = @{ responsavel = 'Maria Silva'; descricao = 'Consulta atualizada' } | ConvertTo-Json
+Invoke-RestMethod -Method Patch -Uri "$api/agendamentos/$id" -Headers $cabecalhos -ContentType 'application/json' -Body $edicao
 
 # Reagendar informando data e horário.
-$novaData = @{ date = '2030-10-16'; time = '14:00' } | ConvertTo-Json
-Invoke-RestMethod -Method Patch -Uri "$api/appointments/$id/reschedule" -Headers $cabecalhos -ContentType 'application/json' -Body $novaData
+$novaData = @{ data = '2030-10-16'; horario = '14:00' } | ConvertTo-Json
+Invoke-RestMethod -Method Patch -Uri "$api/agendamentos/$id/reagendar" -Headers $cabecalhos -ContentType 'application/json' -Body $novaData
 
 # Cancelar e consultar o registro preservado.
-Invoke-RestMethod -Method Patch -Uri "$api/appointments/$id/cancel" -Headers $cabecalhos
-Invoke-RestMethod -Uri "$api/appointments/$id" -Headers $cabecalhos | ConvertTo-Json -Depth 5
+Invoke-RestMethod -Method Patch -Uri "$api/agendamentos/$id/cancelar" -Headers $cabecalhos
+Invoke-RestMethod -Uri "$api/agendamentos/$id" -Headers $cabecalhos | ConvertTo-Json -Depth 5
 ```
 
 ## Regras principais
 
 - Data no formato `AAAA-MM-DD` e horário no formato `HH:mm`, usando 24 horas.
 - Responsável com 1 a 120 caracteres; descrição opcional com até 1.000 caracteres.
-- A edição aceita `description: null` ou uma descrição vazia para removê-la.
-- A situação `scheduled` significa agendado; `cancelled` significa cancelado.
+- A edição aceita `descricao: null` ou uma descrição vazia para removê-la.
+- A situação aceita `agendado` ou `cancelado`.
 - O cancelamento preserva o histórico e impede edições ou reagendamentos posteriores.
 - O token expira em uma hora; faça a autenticação novamente para obter outro.
 - A senha exige pelo menos oito caracteres e não pode ultrapassar 72 bytes em UTF-8.
 - Datas passadas e horários sobrepostos são permitidos neste escopo.
 
-A listagem aceita os filtros `date` e `status` e a paginação `limit` e `offset`.
+A listagem aceita os filtros `data` e `situacao` e a paginação `limite` e `deslocamento`.
 Por padrão, retorna até 50 registros; o limite máximo por consulta é 100.
 
 ## Testes e documentação

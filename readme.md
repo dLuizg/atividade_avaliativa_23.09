@@ -7,6 +7,12 @@ e proteção de senhas com bcrypt.
 Cada agendamento possui identificador, data, horário, responsável e descrição opcional.
 Cada usuário acessa somente os próprios agendamentos.
 
+Atividade realizada por:
+
+- Eduardo Baldo - 25001247
+- Luiz Gustavo Paliares Diniz - 25001239
+- Matteo Enrico Ferri Bonvento - 25000081
+
 ## Como executar neste computador
 
 O banco local e o arquivo `.env` já estão configurados. Na pasta do projeto, execute:
